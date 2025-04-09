@@ -14,6 +14,7 @@ from espnet2.sds.asr.whisper_asr import WhisperASRModel
 from espnet2.sds.end_to_end.mini_omni_e2e import MiniOmniE2EModel
 from espnet2.sds.llm.hugging_face_llm import HuggingFaceLLM
 from espnet2.sds.tts.chat_tts import ChatTTSModel
+# from espnet2.sds.tts.emotional_tts import EmotionalTTSModel
 from espnet2.sds.tts.espnet_tts import ESPnetTTSModel
 from espnet2.sds.utils.chat import Chat
 from espnet2.sds.vad.webrtc_vad import WebrtcVADModel
@@ -124,6 +125,8 @@ class ESPnetSDSModelInterface(AbsESPnetModel):
         tag = option
         if tag == "ChatTTS":
             self.text2speech = ChatTTSModel()
+        # elif tag == 'emotional_tts':
+        #     self.text2speech = EmotionalTTSModel()
         else:
             self.text2speech = ESPnetTTSModel(tag)
         self.text2speech.warmup()

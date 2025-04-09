@@ -357,8 +357,13 @@ def start_warmup():
         try:
             for _ in dialogue_model.handle_ASR_selection(opt):
                 continue
-        except Exception:
-            print("Removing " + opt + " from ASR options since it cannot be loaded.")
+        except Exception as e:
+            print(
+                "Removing "
+                + opt
+                + " from ASR options since it cannot be loaded. Original error is - "
+                + str(e)
+            )
             ASR_options = ASR_options[:opt_count] + ASR_options[(opt_count + 1) :]
             if opt == ASR_name:
                 ASR_name = ASR_options[0]
@@ -367,8 +372,13 @@ def start_warmup():
         try:
             for _ in dialogue_model.handle_LLM_selection(opt):
                 continue
-        except Exception:
-            print("Removing " + opt + " from LLM options since it cannot be loaded.")
+        except Exception as e:
+            print(
+                "Removing "
+                + opt
+                + " from LLM options since it cannot be loaded. Original error is - "
+                + str(e)
+            )
             LLM_options = LLM_options[:opt_count] + LLM_options[(opt_count + 1) :]
             if opt == LLM_name:
                 LLM_name = LLM_options[0]
@@ -377,8 +387,13 @@ def start_warmup():
         try:
             for _ in dialogue_model.handle_TTS_selection(opt):
                 continue
-        except Exception:
-            print("Removing " + opt + " from TTS options since it cannot be loaded.")
+        except Exception as e:
+            print(
+                "Removing "
+                + opt
+                + " from TTS options since it cannot be loaded. Original error is - "
+                + str(e)
+            )
             TTS_options = TTS_options[:opt_count] + TTS_options[(opt_count + 1) :]
             if opt == TTS_name:
                 TTS_name = TTS_options[0]

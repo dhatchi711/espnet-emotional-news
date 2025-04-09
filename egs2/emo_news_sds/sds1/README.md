@@ -7,53 +7,52 @@ This README provides step-by-step instructions for setting up and running the em
 1. Clone the repository:
    ```bash
    git clone https://github.com/espnet/espnet.git
-   cd espnet
+   cd espnet/tools
    ```
 
-2. Navigate to the tools directory:
-   ```bash
-   cd tools
-   ```
-
-3. Set up the Conda environment:
+1. Set up the Conda environment:
    * If you already have Conda installed, create a new environment for ESPnet:
      ```bash
-     ./setup_anaconda.sh ${CONDA_ROOT} espnet 3.8
+     ./setup_anaconda.sh ${CONDA_ROOT} espnet 3.10
      ```
      > Note: Replace `${CONDA_ROOT}` with your Conda root directory (you can find it with `conda env list`).
 
-4. Activate the ESPnet environment:
+1. Activate the ESPnet environment:
    ```bash
    conda activate espnet
    ```
 
-5. Install ESPnet dependencies:
+1. Install ESPnet dependencies:
    * Ensure NVCC is available (you may need to start an SRUN session with GPU)
    * Run the following command to install dependencies:
      ```bash
-     make TH_VERSION=1.10.1
+     make TH_VERSION=2.4
      ```
    * The CUDA version will be automatically selected based on `nvcc --version`.
+   * NOTE: Remove lightning.done from your MAKEFILE since it gives some installaiton issues due to version mismatches. If you are running on the current branch then it is already removed.
 
-6. Create a Hugging Face token:
+1. Install other packages needed for running app
+   * `pip install gradio`
+   * `pip install transformers`
+   * `pip install webrtcvad`
+   * `cd espnet/tools && ./installers/install_whisper.sh`
+
+1. Create a Hugging Face token:
    * Follow the instructions at: https://huggingface.co/docs/hub/en/security-tokens
    * Go to HuggingFace settings and create a new token
    * Copy the token to a secure location
 
-7. Set your Hugging Face token as an environment variable:
+1. Set your Hugging Face token as an environment variable:
    ```bash
    export HF_TOKEN=your_token_here
    ```
 
-8. Navigate to the emotional news speech synthesis directory:
+1. Navigate to the emotional news speech synthesis directory and start gradio server:
    ```bash
    cd ../egs2/emo_news_sds/sds1
-   ```
-
-9. Start the Gradio server:
-   ```bash
    ./run.sh
    ```
+   * Ensure you run `./run.sh` on an srun session with CUDA gpus else it will throw errors.
 
 ## Local Machine Setup
 
