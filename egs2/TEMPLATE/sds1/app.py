@@ -353,6 +353,8 @@ def start_warmup():
     global LLM_name
     global TTS_name
     for opt_count in range(len(ASR_options)):
+        if opt_count >= len(ASR_options):
+            continue
         opt = ASR_options[opt_count]
         try:
             for _ in dialogue_model.handle_ASR_selection(opt):
@@ -368,6 +370,8 @@ def start_warmup():
             if opt == ASR_name:
                 ASR_name = ASR_options[0]
     for opt_count in range(len(LLM_options)):
+        if opt_count >= len(LLM_options):
+            continue
         opt = LLM_options[opt_count]
         try:
             for _ in dialogue_model.handle_LLM_selection(opt):
@@ -383,6 +387,8 @@ def start_warmup():
             if opt == LLM_name:
                 LLM_name = LLM_options[0]
     for opt_count in range(len(TTS_options)):
+        if opt_count >= len(TTS_options):
+            continue
         opt = TTS_options[opt_count]
         try:
             for _ in dialogue_model.handle_TTS_selection(opt):

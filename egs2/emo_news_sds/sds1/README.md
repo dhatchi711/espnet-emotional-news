@@ -31,16 +31,21 @@ This README provides step-by-step instructions for setting up and running the em
    * The CUDA version will be automatically selected based on `nvcc --version`.
    * NOTE: Remove lightning.done from your MAKEFILE since it gives some installaiton issues due to version mismatches. If you are running on the current branch then it is already removed.
 
-1. Install other packages needed for running app
+1. Install other packages needed for running app. I ran in this order: 
    * `pip install gradio`
    * `pip install transformers`
    * `pip install webrtcvad`
    * `cd espnet/tools && ./installers/install_whisper.sh`
+   * `cd espnet/tools && make s3prl.done`
+   * `pip install snac`
+   * `pip install litgpt`
+   * `pip install `
+   * `pip install torch==2.4.0`
 
 1. Create a Hugging Face token:
    * Follow the instructions at: https://huggingface.co/docs/hub/en/security-tokens
    * Go to HuggingFace settings and create a new token
-   * Copy the token to a secure location
+   * Copy the token to a secure location (put it in `local/path.sh` for automatically exporting, but don't push the file on github.)
 
 1. Set your Hugging Face token as an environment variable:
    ```bash
@@ -54,13 +59,18 @@ This README provides step-by-step instructions for setting up and running the em
    ```
    * Ensure you run `./run.sh` on an srun session with CUDA gpus else it will throw errors.
 
-## Local Machine Setup
+## Local Machine Setup [Optional]
+
+Gradio spits out a public URL for the server. However, there can be some issues on it so you may have to setup port forwarding in order to open the website locally.
 
 1. Forward the SSH port to access the web application:
    ```bash
    ssh -L local_port:localhost:remote_port username@remote_server_address
    ```
-   > Note: Replace `local_port`, `remote_port`, `username`, and `remote_server_address` with your specific values. The remote port will be shown in the output when the Gradio server starts.
+   > Note: Replace `local_port`, `remote_port`, `username`, and `remote_server_address` with your specific values. The remote port will be shown in the output when the Gradio server starts. You can use 7860 for `local_port`. For me the command is:
+   ```bash
+    ssh -L 7860:127.0.0.1:7860 sbharad2@babel-1-27
+    ```
 
 2. Access the web application:
    * Open your web browser
