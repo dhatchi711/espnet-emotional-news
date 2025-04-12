@@ -32,14 +32,13 @@ This README provides step-by-step instructions for setting up and running the em
    * NOTE: Remove lightning.done from your MAKEFILE since it gives some installaiton issues due to version mismatches. If you are running on the current branch then it is already removed.
 
 1. Install other packages needed for running app. I ran in this order: 
-   * `pip install gradio`
+   * `pip install gradio==4.43.0`
    * `pip install transformers`
-   * `pip install webrtcvad`
+   * `pip install webrtcvad==2.0.10`
    * `cd espnet/tools && ./installers/install_whisper.sh`
    * `cd espnet/tools && make s3prl.done`
-   * `pip install snac`
-   * `pip install litgpt`
-   * `pip install `
+   * `pip install snac==1.2.0`
+   * `pip install litgpt==0.4.3`
    * `pip install torch==2.4.0`
 
 1. Create a Hugging Face token:
@@ -82,6 +81,18 @@ Gradio spits out a public URL for the server. However, there can be some issues 
 * If NVCC is not found, ensure you are in a GPU-enabled session
 * If you encounter Conda environment issues, verify your Conda root directory is correct
 * For Gradio server connection problems, check that your port forwarding is configured correctly
+
+* If you get the following error on executing `./run.sh` 
+   ```bash
+      if "const" in schema:
+   TypeError: argument of type 'bool' is not iterable
+   ```
+   Then go to `python3.10/site-packages/gradio_client/utils.py` and add an `if` to the `get_type` function:
+   ```python
+      def get_type(schema: dict):
+         if not isinstance(schema, dict):
+            return 'boolean'
+   ```
 
 ## Additional Resources
 
