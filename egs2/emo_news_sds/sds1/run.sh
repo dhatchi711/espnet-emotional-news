@@ -14,8 +14,19 @@ exit 1
 #   --llm_options "meta-llama/Llama-3.2-1B-Instruct,HuggingFaceTB/SmolLM2-1.7B-Instruct" \
 #   --asr_options "pyf98/owsm_ctc_v3.1_1B,espnet/owsm_ctc_v3.2_ft_1B,espnet/owsm_v3.1_ebf,librispeech_asr,whisper-large"
 
+
+# python app.py \
+#   --eval_options "ASR WER" \
+#   --tts_options "kan-bayashi/ljspeech_vits" \
+#   --llm_options "HuggingFaceTB/SmolLM2-1.7B-Instruct" \
+#   --asr_options "whisper-large"
+
+
 python app.py \
   --eval_options "ASR WER" \
   --tts_options "kan-bayashi/ljspeech_vits" \
   --llm_options "HuggingFaceTB/SmolLM2-1.7B-Instruct" \
-  --asr_options "whisper-large"
+  --asr_options "whisper-large" \
+  --rag_data_base_path "/data/user_data/sbharad2/espnet/egs2/emo_news_sds/sds1/cache/news_db" \
+  --rag_dataset_dir "/data/user_data/sbharad2/free-news-datasets/News_Datasets" \
+  --rag

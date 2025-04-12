@@ -32,6 +32,8 @@ from pyscripts.utils.dialog_eval.TTS_intelligibility import (
 from pyscripts.utils.dialog_eval.TTS_speech_quality import TTS_psuedomos
 
 from espnet2.sds.espnet_model import ESPnetSDSModelInterface
+from espnet2.sds.rag_sds_model import RagSdsModelInterface
+from espnet2.sds.rag.news_corpus_sentence_transformer_rag import EmbeddingSearchEngine
 
 # ------------------------
 # Hyperparameters
@@ -124,6 +126,19 @@ def parse_args():
         default=None,
         help="Hugging Face dataset to upload user data",
     )
+    parser.add_argument("--rag", action="store_true", help="Use RAG-SDS model")
+    parser.add_argument(
+        "--rag_data_base_path", type=str, required=True, help="Path to the RAG database"
+    )
+    parser.add_argument(
+        "--rag_embedding_model",
+        type=str,
+        default="sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
+        help="Name of the model to use for embeddings",
+    )
+    parser.add_argument(
+        "--rag_dataset_dir", type=str, help="Path to the News dataset directory"
+    )
     args = parser.parse_args()
     ASR_name = args.default_asr_model
     LLM_name = args.default_llm_model
@@ -151,9 +166,22 @@ def parse_args():
         )
         LLM_name = LLM_options[0]
     upload_to_hub = args.upload_to_hub
-    dialogue_model = ESPnetSDSModelInterface(
-        ASR_name, LLM_name, TTS_name, "Cascaded", access_token
-    )
+    if args.rag:
+        retrieval_engine = EmbeddingSearchEngine(
+            data_base_path=args.rag_data_base_path, model_name=args.rag_embedding_model
+        )
+        gr.Info(
+            "The RAG-Database is setting up. "
+            "This may take a few minutes. Please wait."
+        )
+        retrieval_engine.setup(dataset_dir=args.rag_dataset_dir)
+        dialogue_model = RagSdsModelInterface(
+            ASR_name, LLM_name, TTS_name, "Cascaded", access_token, retrieval_engine
+        )
+    else:
+        dialogue_model = ESPnetSDSModelInterface(
+            ASR_name, LLM_name, TTS_name, "Cascaded", access_token
+        )
 
 
 def handle_eval_selection(
