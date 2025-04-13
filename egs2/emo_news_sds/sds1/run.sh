@@ -15,18 +15,22 @@ exit 1
 #   --asr_options "pyf98/owsm_ctc_v3.1_1B,espnet/owsm_ctc_v3.2_ft_1B,espnet/owsm_v3.1_ebf,librispeech_asr,whisper-large"
 
 
-# python app.py \
-#   --eval_options "ASR WER" \
-#   --tts_options "kan-bayashi/ljspeech_vits" \
-#   --llm_options "HuggingFaceTB/SmolLM2-1.7B-Instruct" \
-#   --asr_options "whisper-large"
-
-
 python app.py \
   --eval_options "ASR WER" \
   --tts_options "kan-bayashi/ljspeech_vits" \
   --llm_options "HuggingFaceTB/SmolLM2-1.7B-Instruct" \
-  --asr_options "whisper-large" \
-  --rag_data_base_path "/data/user_data/sbharad2/espnet/egs2/emo_news_sds/sds1/cache/news_db" \
-  --rag_dataset_dir "/data/user_data/sbharad2/free-news-datasets/News_Datasets" \
-  --rag
+  --asr_options "whisper-large"
+
+# TODOS
+# 1. Build index over all news articles
+# 2. Remove Fixed YES/NO on the rag trigger after getting access to a better LLM than SmolLM2
+
+
+# python app.py \
+#   --eval_options "ASR WER" \
+#   --tts_options "kan-bayashi/ljspeech_vits" \
+#   --llm_options "HuggingFaceTB/SmolLM2-1.7B-Instruct" \
+#   --asr_options "whisper-large" \
+#   --rag_data_base_path "/data/user_data/sbharad2/espnet/egs2/emo_news_sds/sds1/cache/news_db" \
+#   --rag_dataset_dir "/data/user_data/sbharad2/free-news-datasets/News_Datasets" \
+#   --rag

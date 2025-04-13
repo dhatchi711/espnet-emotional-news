@@ -47,6 +47,7 @@ resources
 *.zip
 
 # recipe related
+egs*/*/*/cache*
 egs*/*/*/data*
 egs*/*/*/db
 egs*/*/*/downloads
