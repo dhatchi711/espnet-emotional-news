@@ -91,16 +91,17 @@ class RagSdsModelInterface(AbsESPnetModel):
         self.client = None
         self.vad_model = WebrtcVADModel()
         self.chat = Chat(2)
+        self.SYSTEM_PROMPT = (
+            "You are a helpful and friendly AI "
+            "assistant. "
+            "You are polite, respectful, and aim to "
+            "provide concise and complete responses of "
+            "less than 15 words."
+        )
         self.chat.init_chat(
             {
                 "role": "system",
-                "content": (
-                    "You are a helpful and friendly AI "
-                    "assistant. "
-                    "You are polite, respectful, and aim to "
-                    "provide concise and complete responses of "
-                    "less than 15 words."
-                ),
+                "content": self.SYSTEM_PROMPT,
             }
         )
         self.user_role = "user"
@@ -482,12 +483,10 @@ class RagSdsModelInterface(AbsESPnetModel):
             if system_idx is not None:
                 # Create a copy of chat messages with modified system prompt
                 modified_chat_messages = chat_messages.copy()
-                original_system_content = modified_chat_messages[system_idx]["content"]
-
                 # Craft a better system message that helps the LLM use the context effectively
                 print("RAG: Modified system message with context")
                 modified_chat_messages[system_idx]["content"] = (
-                    f"{original_system_content}\n\n"
+                    f"{self.SYSTEM_PROMPT}\n\n"
                     f"You have access to articles about '{self.rag_query}'. "
                     f"Here is the relevant information:\n\n{self.rag_context}\n\n"
                     f"Use this information to provide accurate and informative responses about {self.rag_query}. "
@@ -537,7 +536,6 @@ class RagSdsModelInterface(AbsESPnetModel):
         Returns:
             bool: True if the user is requesting news, False otherwise
         """
-        return True
         # Define the prompt to determine if news retrieval is needed
         prompt = f"""You will only return a YES or NO answer.
 Given a command from the user, tell if the user wants to talk about a news article, retrieve information about current events, or get updated on recent happenings. 
