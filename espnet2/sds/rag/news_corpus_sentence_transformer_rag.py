@@ -99,7 +99,9 @@ class EmbeddingSearchEngine:
         collection = self.client.get_or_create_collection(
             name=collection_name, embedding_function=embedding_function
         )
-        json_files = [f for f in os.listdir(json_dir) if f.endswith(".json")]
+        json_files = [f for f in os.listdir(json_dir) if f.endswith(".json")][
+            :2
+        ]  # TODO(shikhar): change 10
 
         for json_file in tqdm(json_files, desc=f"Processing {collection_name}"):
             file_path = os.path.join(json_dir, json_file)
@@ -108,6 +110,7 @@ class EmbeddingSearchEngine:
                 with open(file_path, "r", encoding="utf-8") as f:
                     data = json.load(f)
                     text_to_embed = data.get(embed_field, "")
+                    print(text_to_embed)
                     content = data.get(content_field, "")
 
                     if text_to_embed:
@@ -178,9 +181,11 @@ class EmbeddingSearchEngine:
                 )
 
         all_results.sort(key=lambda x: x["distance"])
+        print(len(all_results), "before filtering")
 
         if threshold is not None:
             all_results = [r for r in all_results if r["distance"] < threshold]
+        print(len(all_results), "after filtering", top_k)
 
         return all_results[:top_k]
 

@@ -128,7 +128,10 @@ def parse_args():
     )
     parser.add_argument("--rag", action="store_true", help="Use RAG-SDS model")
     parser.add_argument(
-        "--rag_data_base_path", type=str, required=True, help="Path to the RAG database"
+        "--rag_data_base_path",
+        default="./cache",
+        type=str,
+        help="Path to the RAG database",
     )
     parser.add_argument(
         "--rag_embedding_model",

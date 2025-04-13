@@ -22,14 +22,16 @@ This README provides step-by-step instructions for setting up and running the em
    conda activate espnet
    ```
 
-1. Install ESPnet dependencies:
+1. Install ESPnet:
    * Ensure NVCC is available (you may need to start an SRUN session with GPU)
-   * Run the following command to install dependencies:
+   * Run the following command to install espnet:
      ```bash
      make TH_VERSION=2.4
      ```
+     If the make is successful you will get check boxes at the end showing installed libraries. If not, you will get the error.
    * The CUDA version will be automatically selected based on `nvcc --version`.
    * NOTE: Remove lightning.done from your MAKEFILE since it gives some installaiton issues due to version mismatches. If you are running on the current branch then it is already removed.
+   * Check if espnet is installed correctly using: https://espnet.github.io/espnet/installation.html#check-installation
 
 1. Install other packages needed for running app. I ran in this order: 
    * `pip install gradio==4.43.0`
@@ -92,6 +94,29 @@ Gradio spits out a public URL for the server. However, there can be some issues 
       def get_type(schema: dict):
          if not isinstance(schema, dict):
             return 'boolean'
+   ```
+
+
+## Preparing News Corpus
+1. Extract News data
+   ```bash
+   git clone https://github.com/Webhose/free-news-datasets.git
+
+   cd free-news-datasets/News_Datasets/
+
+   for file in *.zip; do
+      echo "Processing: $file"
+      unzip -o "$file" || echo "Skipping corrupted/empty file: $file"
+   done
+
+   rm *.zip
+
+   ```
+1. Additional installs
+   ```bash
+   pip install chromadb
+   pip install --no-deps sentence_transformer
+   pip install gradio==4.43
    ```
 
 ## Additional Resources

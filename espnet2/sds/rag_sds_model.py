@@ -209,9 +209,9 @@ class RagSdsModelInterface(AbsESPnetModel):
         This method dynamically loads the E2E spoken dialog model.
         If the model is already active, it avoids reloading to save resources.
         """
-        raise NotImplementedError(
-            "E2E model selection is not implemented in this version."
-        )
+        if self.client is None:
+            self.client = MiniOmniE2EModel()
+            self.client.warmup()
 
     def handle_type_selection(
         self, option: str, TTS_radio: str, ASR_radio: str, LLM_radio: str
@@ -336,6 +336,7 @@ class RagSdsModelInterface(AbsESPnetModel):
 
                 # Check for reset commands or topic changes
                 if self._check_for_reset(prompt):
+                    print("RAG: Resetting conversation context")
                     self._reset_rag_state()
 
                 # Process RAG context if needed
@@ -349,6 +350,7 @@ class RagSdsModelInterface(AbsESPnetModel):
 
                 # Prepare chat messages with RAG context if available
                 chat_messages = self._prepare_chat_messages()
+                print("Length of chat messages:", len(chat_messages))
 
                 # Generate response using LLM
                 generated_text = self.LM_pipe(chat_messages)
@@ -396,15 +398,17 @@ class RagSdsModelInterface(AbsESPnetModel):
         Args:
             query_text (str): The input text to search for.
             top_k (int): The number of top results to return.
-            threshold (float, optional): Minimum similarity threshold (0-1).
+            threshold (float, optional): Maximum distance threshold.
                 Defaults to None.
         Returns:
             Optional[str]: The retrieved context or None if no results found.
         """
+        print(f"RAG: Querying database with text: {query_text}")
         if self.retrieval_engine is not None:
             results = self.retrieval_engine.query(
                 query_text, top_k=top_k, threshold=threshold
             )
+            print(f"RAG: Retrieved {len(results)} results from database")
             if results:
                 context = "\n".join([result["content"] for result in results])
                 return context
@@ -425,10 +429,13 @@ class RagSdsModelInterface(AbsESPnetModel):
 
         # Determine if we should check for RAG trigger
         should_check_rag = (not self.rag_triggered) or potential_topic_change
-
+        print(
+            f"RAG: should_check_rag={should_check_rag}, rag_triggered={self.rag_triggered}"
+        )
         if should_check_rag:
             # Use LLM to determine if news retrieval is needed
             should_trigger_rag = self._should_retrieve_news(prompt)
+            print(f"RAG: should_trigger_rag={should_trigger_rag}")
 
             if should_trigger_rag and self.retrieval_engine is not None:
                 print("RAG: Retrieving context")
@@ -437,7 +444,8 @@ class RagSdsModelInterface(AbsESPnetModel):
                 query = self._extract_search_query(prompt)
 
                 # Call the retrieval engine to get context
-                retrieved_context = self._maybe_retrieve_context(query, top_k=3)
+                retrieved_context = self._maybe_retrieve_context(query)
+                print(f"RAG: Retrieved context: {retrieved_context}")
 
                 if retrieved_context:
                     # Store the context
@@ -463,9 +471,8 @@ class RagSdsModelInterface(AbsESPnetModel):
         """Prepare chat messages with RAG context if available."""
         chat_messages = self.chat.to_list()
 
-        # If we have retrieved context, create a modified system message
         if self.rag_context:
-            # Find the system message
+            print("RAG: Preparing chat messages with context")
             system_idx = None
             for i, msg in enumerate(chat_messages):
                 if msg["role"] == "system" and "You are a helpful" in msg["content"]:
@@ -478,6 +485,7 @@ class RagSdsModelInterface(AbsESPnetModel):
                 original_system_content = modified_chat_messages[system_idx]["content"]
 
                 # Craft a better system message that helps the LLM use the context effectively
+                print("RAG: Modified system message with context")
                 modified_chat_messages[system_idx]["content"] = (
                     f"{original_system_content}\n\n"
                     f"You have access to articles about '{self.rag_query}'. "
@@ -489,6 +497,7 @@ class RagSdsModelInterface(AbsESPnetModel):
                 return modified_chat_messages
             else:
                 # Fallback: add a one-time system message with context
+                print("RAG: Adding one-time system message with context")
                 context_message = {
                     "role": "system",
                     "content": f"Here's information about {self.rag_query} that you can use for your response: {self.rag_context}",
@@ -497,7 +506,6 @@ class RagSdsModelInterface(AbsESPnetModel):
                 modified_chat_messages.insert(0, context_message)
                 return modified_chat_messages
 
-        # No context, use regular messages
         return chat_messages
 
     def _reset_rag_state(self):
@@ -529,11 +537,12 @@ class RagSdsModelInterface(AbsESPnetModel):
         Returns:
             bool: True if the user is requesting news, False otherwise
         """
+        return True
         # Define the prompt to determine if news retrieval is needed
         prompt = f"""You will only return a YES or NO answer.
 Given a command from the user, tell if the user wants to talk about a news article, retrieve information about current events, or get updated on recent happenings. 
 
-Examples that should return YES:
+Some examples that should return a YES are:
 - "fetch articles about the latest earthquake"
 - "what is happening with the election"
 - "tell me about recent tech news"
@@ -548,37 +557,24 @@ Examples that should return YES:
 - "are there any new developments in renewable energy"
 - "I heard something about a new law"
 - "update me on international affairs"
-
-Examples that should return NO:
-- "what time is it"
-- "tell me a joke"
-- "what's the weather like today"
-- "how do I bake a chocolate cake"
-- "can you help me with my homework"
-- "play some music"
-- "what's your favorite color"
-- "calculate 15% of 85"
-- "remind me to call John tomorrow"
-- "how does photosynthesis work"
-- "who invented the telephone"
-- "what's the capital of France"
-- "continue our earlier conversation"
-- "could you elaborate on that"
+Understand that the user may use different words than these.
 
 Here is the command:
-[{user_command}]
+{user_command}
 
 Return only YES or NO.
 """
         # Create a special context-free chat to avoid contaminating the main chat
         temp_messages = [{"role": "user", "content": prompt}]
+        print(f"RAG: Checking if news retrieval is needed for command: {user_command}")
 
         try:
             # Use LLM to get a YES/NO response
-            response = self.LM_pipe(temp_messages, max_tokens=5)
+            response = self.LM_pipe(temp_messages)
 
             # Clean and parse the response
             response = response.strip().upper()
+            print(f"RAG: LLM response: {response}")
 
             # Handle various response formats
             if "YES" in response:
@@ -637,7 +633,7 @@ Return ONLY the search query with no additional text.
 
         try:
             # Use LLM to extract the search query
-            response = self.LM_pipe(temp_messages, max_tokens=20)
+            response = self.LM_pipe(temp_messages)
 
             # Clean the response
             query = response.strip()
