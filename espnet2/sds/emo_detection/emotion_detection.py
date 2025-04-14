@@ -1,10 +1,30 @@
+from typing import List
 from warnings import warn
 import torch
 from simpletransformers.classification import ClassificationModel
 
-class EmotionDetection:
-    def __init__(self, device: str="cuda"):
+def get_label_list(tag: str) -> List[str]:
+    if tag == "RusCucumber/good-news-everyon-emotion-detection":
         label_list = ["Angry", "Happy", "Sad"]
+        return label_list
+    
+    if tag == "RusCucumber/go-emotions-emotion-detection":
+        label_list = ["Angry", "Happy", "Neutral", "Sad", "Surprise"]
+        return label_list
+    
+    if tag == "RusCucumber/unified-emotion-detection":
+        label_list = ["Angry", "Happy", "Neutral", "Sad", "Surprise"]
+        return label_list
+    
+    raise KeyError(f"\"{tag}\" not found.")
+
+class EmotionDetectionModel:
+    def __init__(
+            self, 
+            device: str="cuda",
+            tag: str="RusCucumber/good-news-everyon-emotion-detection"
+    ):
+        label_list = get_label_list(tag)
 
         if device == "cpu":
             use_cuda = False
@@ -28,7 +48,7 @@ class EmotionDetection:
             }
         )
 
-        detector.model.from_pretrained("RusCucumber/good-news-everyon-emotion-detection")
+        detector.model.from_pretrained(tag)
 
         self.detector = detector
 
@@ -46,7 +66,7 @@ class EmotionDetection:
         return pred[0]
     
 if __name__ == "__main__":
-    emotion_detection = EmotionDetection(device="cuda")
+    emotion_detection = EmotionDetectionModel(device="cuda", tag="RusCucumber/unified-emotion-detection")
     emotion = emotion_detection.forward("Dam breaking: New Epstein accuser comes forward.")
 
     print(emotion)
