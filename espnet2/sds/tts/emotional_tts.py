@@ -15,7 +15,7 @@ from espnet2.sds.tts.abs_tts import AbsTTS
 from espnet2.sds.tts.prompt_tts.prompt_tts_modified.jets import JETSGenerator
 from espnet2.sds.tts.prompt_tts.prompt_tts_modified.simbert import StyleEncoder
 from espnet2.sds.tts.prompt_tts.prompt_tts_modified.text_2_phoneme import Text2Phoneme
-from espnet2.sds.emo_detection.emotion_detection import EmotionDetection
+from espnet2.sds.emo_detection.emotion_detection import RoBERTaEmotionDetectionModel
 
 MAX_WAV_VALUE = 32768.0
 FS = 16000
@@ -29,6 +29,7 @@ class EmotionalTTSModel(AbsTTS):
     def __init__(
         self,
         speaker: str ="0011", # choose 0011, 0012, ..., 0020
+        emotion_detection_tag: str ="RusCucumber/unified-emotion-detection",
         device: str ="cuda",
     ):
         if not RESOURCE_DIR.exists():
@@ -86,7 +87,7 @@ class EmotionalTTSModel(AbsTTS):
 
         self.tokenizer = AutoTokenizer.from_pretrained(config.bert_path)
         self.t2p = Text2Phoneme(config)
-        self.emotion_detector = EmotionDetection(device=device)
+        self.emotion_detector = RoBERTaEmotionDetectionModel(device=device, tag=emotion_detection_tag)
 
         self.speaker = speaker2id[speaker]
         self.transcript_regex = re.compile(r"<(.*?)>(.*)")

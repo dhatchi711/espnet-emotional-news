@@ -2,6 +2,7 @@ from typing import List
 from warnings import warn
 import torch
 from simpletransformers.classification import ClassificationModel
+from transformers import RobertaForSequenceClassification
 
 def get_label_list(tag: str) -> List[str]:
     if tag == "RusCucumber/good-news-everyon-emotion-detection":
@@ -18,7 +19,9 @@ def get_label_list(tag: str) -> List[str]:
     
     raise KeyError(f"\"{tag}\" not found.")
 
-class EmotionDetectionModel:
+# TODO: add prompting model
+
+class RoBERTaEmotionDetectionModel:
     def __init__(
             self, 
             device: str="cuda",
@@ -48,7 +51,7 @@ class EmotionDetectionModel:
             }
         )
 
-        detector.model.from_pretrained(tag)
+        detector.model = RobertaForSequenceClassification.from_pretrained(tag)
 
         self.detector = detector
 
@@ -66,7 +69,7 @@ class EmotionDetectionModel:
         return pred[0]
     
 if __name__ == "__main__":
-    emotion_detection = EmotionDetectionModel(device="cuda", tag="RusCucumber/unified-emotion-detection")
+    emotion_detection = RoBERTaEmotionDetectionModel(device="cuda", tag="RusCucumber/unified-emotion-detection")
     emotion = emotion_detection.forward("Dam breaking: New Epstein accuser comes forward.")
 
     print(emotion)
