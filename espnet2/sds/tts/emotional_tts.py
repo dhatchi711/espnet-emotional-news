@@ -15,6 +15,7 @@ from espnet2.sds.tts.abs_tts import AbsTTS
 from espnet2.sds.tts.prompt_tts.prompt_tts_modified.jets import JETSGenerator
 from espnet2.sds.tts.prompt_tts.prompt_tts_modified.simbert import StyleEncoder
 from espnet2.sds.tts.prompt_tts.prompt_tts_modified.text_2_phoneme import Text2Phoneme
+from espnet2.sds.emo_detection.emotion_detection import EmotionDetection
 
 MAX_WAV_VALUE = 32768.0
 FS = 16000
@@ -23,7 +24,7 @@ EMOTION_LABELS = ["Neutral", "Happy", "Sad", "Angry", "Surprise"]
 PRETRAINED_MODEL_GOOGLE_DRIVE = "https://drive.google.com/uc?id=1pWgj6_sOBpvF6EjPt89qGf_kdZq4rVWY"
 RESOURCE_DIR = Path(__file__).parents[3] / "resources"
 
-class EmotionalTTS(AbsTTS):
+class EmotionalTTSModel(AbsTTS):
     @typechecked
     def __init__(
         self,
@@ -85,6 +86,7 @@ class EmotionalTTS(AbsTTS):
 
         self.tokenizer = AutoTokenizer.from_pretrained(config.bert_path)
         self.t2p = Text2Phoneme(config)
+        self.emotion_detector = EmotionDetection(device=device)
 
         self.speaker = speaker2id[speaker]
         self.transcript_regex = re.compile(r"<(.*?)>(.*)")
@@ -92,8 +94,8 @@ class EmotionalTTS(AbsTTS):
         self.device = device
 
     def warmup(self):
-        prompt = "Neutral"
         content = "This is warmup."
+        prompt = self.emotion_detector(content)
         text = self.t2p(content)
 
         style_embedding = self.get_style_embedding(prompt)
@@ -149,9 +151,7 @@ class EmotionalTTS(AbsTTS):
         """
         Args:
             transcript (str):
-                An input transcript must follow the format:
-                    "<EMOTION_LABEL>I live in Pittsburgh. ...",
-                where emotion label must be chosen from ["Neutral", "Happy", "Sad", "Angry", "Surprise"].
+                Note. The current emotion detection model only classifies emotions into Happy, Angry, and Sad
         
         Returns:
             Tuple[int, np.ndarray]:
@@ -160,11 +160,12 @@ class EmotionalTTS(AbsTTS):
                 - The generated audio waveform as a
             NumPy array of type `int16`.
         """
-        emotion_label, content = self.split_emotion_label_transcript(transcript)
-        text = self.t2p(content)
+        emotion_label = self.emotion_detector.forward(transcript)
+        print(f"EmotionDetection: predicted as {emotion_label}")
+        text = self.t2p(transcript)
 
         style_embedding = self.get_style_embedding(emotion_label)
-        content_embedding = self.get_style_embedding(content)
+        content_embedding = self.get_style_embedding(transcript)
         text_int = [self.token2id[phoneme] for phoneme in text]
 
         sequence = torch.from_numpy(np.array(text_int)).to(self.device).long().unsqueeze(0)
