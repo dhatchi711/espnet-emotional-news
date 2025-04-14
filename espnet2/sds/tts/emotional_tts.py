@@ -120,9 +120,9 @@ class EmotionalTTSModel(AbsTTS):
 
     def get_style_embedding(self, prompt: str):
         prompt = self.tokenizer([prompt], return_tensors="pt")
-        input_ids = prompt["input_ids"]
-        token_type_ids = prompt["token_type_ids"]
-        attention_mask = prompt["attention_mask"]
+        input_ids = prompt["input_ids"].to(self.device)
+        token_type_ids = prompt["token_type_ids"].to(self.device)
+        attention_mask = prompt["attention_mask"].to(self.device)
 
         with torch.no_grad():
             output = self.style_encoder(
