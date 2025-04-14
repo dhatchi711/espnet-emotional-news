@@ -16,3 +16,13 @@ python3 json_title_embeddings.py \
     --dataset_dir "/data/user_data/jiaruil5/11692/free-news-datasets/News_Datasets" \
     --data_base_path /data/user_data/jiaruil5/11692/news_db
 ```
+
+Step 2: remove non-English news
+
+
+Step 3: query news
+
+```bash
+# An example
+python3 query_news.py
+```

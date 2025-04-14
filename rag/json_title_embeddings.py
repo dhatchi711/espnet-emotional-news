@@ -23,7 +23,7 @@ def clean_and_format_string(text):
     # Remove extra spaces and split into words
     words = cleaned.split()
     # Capitalize each word and join with space
-    return ''.join(word.capitalize() for word in words)
+    return ''.join(words)
 
 class CustomEmbeddingFunction:
     def __init__(self, model_name, device="cuda"):
@@ -60,6 +60,10 @@ def process_json_files(args):
         try:
             with open(file_path, 'r', encoding='utf-8') as f:
                 data = json.load(f)
+                
+                language = data.get('language', 'none')
+                if language != 'english':
+                    continue
                 
                 # Extract title
                 title = data.get('title', '')
