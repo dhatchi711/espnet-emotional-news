@@ -109,6 +109,11 @@ class EmbeddingSearchEngine:
             try:
                 with open(file_path, "r", encoding="utf-8") as f:
                     data = json.load(f)
+                    
+                    language = data.get('language', 'none')
+                    if language != 'english':
+                        continue
+
                     text_to_embed = data.get(embed_field, "")
                     print(text_to_embed)
                     content = data.get(content_field, "")
