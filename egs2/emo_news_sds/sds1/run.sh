@@ -25,12 +25,14 @@ exit 1
 # 1. Build index over all news articles
 # 2. Remove Fixed YES/NO on the rag trigger after getting access to a better LLM than SmolLM2
 
+# Change --rag_data_base_path and --rag_dataset_dir based on your environment
 
 python app.py \
+  --default_tts_model "emotional_tts" \
   --eval_options "ASR WER" \
-  --tts_options "kan-bayashi/ljspeech_vits" \
+  --tts_options "emotional_tts,kan-bayashi/ljspeech_vits" \
   --llm_options "meta-llama/Llama-3.2-1B-Instruct" \
   --asr_options "whisper-large" \
-  --rag_data_base_path "/data/user_data/sbharad2/espnet/egs2/emo_news_sds/sds1/cache/news_db" \
-  --rag_dataset_dir "/data/user_data/sbharad2/free-news-datasets/News_Datasets" \
+  --rag_data_base_path "/home/ubuntu/espnet-emotional-news/egs2/emo_news_sds/sds1/cache/news_db" \
+  --rag_dataset_dir "/home/ubuntu/free-news-datasets/News_Datasets" \
   --rag
