@@ -95,7 +95,7 @@ class EmotionalTTSModel(AbsTTS):
 
     def warmup(self):
         content = "This is warmup."
-        prompt = self.emotion_detector(content)
+        prompt = self.emotion_detector.forward(content)
         text = self.t2p(content)
 
         style_embedding = self.get_style_embedding(prompt)
