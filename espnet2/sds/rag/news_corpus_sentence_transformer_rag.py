@@ -1,6 +1,7 @@
 import os
 import json
 import chromadb
+import chromadb.errors
 import torch
 import re
 import argparse
@@ -158,11 +159,16 @@ class EmbeddingSearchEngine:
         query_embedding = self.model.encode([query_text])[0].tolist()
         for collection in collections:
             logging.info(f"Querying collection: {collection.name}")
-            query_result = collection.query(
-                query_embeddings=[query_embedding],
-                n_results=top_k,
-                include=["documents", "distances", "metadatas"],
-            )
+            try:
+                query_result = collection.query(
+                    query_embeddings=[query_embedding],
+                    n_results=top_k,
+                    include=["documents", "distances", "metadatas"],
+                )
+            except chromadb.errors.InternalError as e:
+                logging.error(f"Error querying {collection.name}: {e}")
+                continue
+
             # ids, documents, distances
 
             if not query_result["ids"] or not query_result["ids"][0]:
